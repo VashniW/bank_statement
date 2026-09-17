@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Ledger Account Statements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<section class="login-screen">
+  <div class="login-card">
+    <p class="brand-mark">
+      Ledger <span class="brand-badge">Banking</span>
+    </p>
+    <h1>Sign in to your account</h1>
+    <p class="login-sub">Access your monthly statements, balances, transaction ledger, and official PDF downloads.</p>
+
+    <form id="loginForm" class="login-form">
+      <label for="email">Email address</label>
+      <input type="email" id="email" value="asha.rao@example.com" placeholder="name@example.com" required autofocus />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" value="password123" placeholder="••••••••" required />
+
+      <button type="submit" id="submitBtn" class="btn-primary">Sign in</button>
+    </form>
+
+    <p id="loginError" class="error-text" hidden></p>
+
+    <div class="demo-hint">
+      <p>Quick demo logins (click to autofill):</p>
+      <div class="demo-accounts">
+        <div class="demo-chip" data-email="asha.rao@example.com" data-password="password123">
+          <code>asha.rao@example.com</code>
+          <span>Savings + Credit</span>
+        </div>
+        <div class="demo-chip" data-email="vikram.shah@example.com" data-password="password123">
+          <code>vikram.shah@example.com</code>
+          <span>Wallet + Savings</span>
+        </div>
+        <div class="demo-chip" data-email="admin@example.com" data-password="password123">
+          <code>admin@example.com</code>
+          <span>Admin</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="login.js"></script>
+</body>
+</html>

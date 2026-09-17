@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+app:
+  jwt:
+    # NOTE: replace with a securely generated secret (env var / secrets manager)
+    # before any real deployment - this is a dev-only placeholder.
+    secret: "dev-only-placeholder-secret-key-change-me-before-deploying-anywhere-real"
+    expiration-ms: 3600000   # 1 hour
+
+spring:
+  application:
+    name: bank-statement
+
+  datasource:
+    url: jdbc:h2:file:./data/bankstatement;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      # SECURITY: disabled by default - the H2 console is a full SQL client
+      # with no auth of its own beyond the default sa/blank credentials.
+      # Enabled only via the "dev" profile (see application-dev.yml).
+      # Run locally with: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Fee thresholds/rates - placeholder config for later phases
+statement:
+  fees:
+    minimum-balance-threshold: 10000
+    minimum-balance-fee: 300
+    overdraft-fee: 500
+    monthly-maintenance-fee: 150
+    free-withdrawals-per-month: 5
+    excess-withdrawal-fee: 25
+  interest:
+    savings-annual-rate: 3.5
+    credit-annual-rate: 30.0
+    wallet-annual-rate: 0.0
+  batch:
+    # 1st of every month, midnight (12 AM) - generates statements for the previous month
+    cron: "0 0 0 1 * *"
+  pdf:
+    storage-path: ./data/statement-pdfs
+    # Owner password unlocks full permissions (print/edit) regardless of the
+    # per-statement user password below - keep this one secret, it's never
+    # derived from account data the way the user password is.
+    owner-password: "owner-password"

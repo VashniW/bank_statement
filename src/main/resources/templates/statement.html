@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Account Statement</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        .header { border-bottom: 2px solid #1a3c5e; padding-bottom: 10px; margin-bottom: 15px; }
+        .header h1 { color: #1a3c5e; font-size: 20px; margin: 0 0 4px 0; }
+        .header .sub { color: #666; font-size: 12px; }
+        .info-table { width: 100%; margin-bottom: 15px; }
+        .info-table td { padding: 3px 0; }
+        .info-label { color: #666; width: 160px; }
+        .status-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 3px;
+            font-size: 10px; font-weight: bold; color: #fff;
+        }
+        .status-generated { background-color: #2e7d32; }
+        .status-provisional { background-color: #e08a00; }
+        .summary-box {
+            border: 1px solid #ccc; background-color: #f7f9fb;
+            padding: 12px; margin-bottom: 20px;
+        }
+        .summary-box table { width: 100%; }
+        .summary-box td { padding: 4px 8px; }
+        .summary-label { color: #555; }
+        .summary-value { text-align: right; font-weight: bold; }
+        .closing-row td { border-top: 1px solid #ccc; padding-top: 8px; font-size: 13px; }
+        table.lines { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table.lines th {
+            background-color: #1a3c5e; color: #fff; text-align: left;
+            padding: 6px 8px; font-size: 10px;
+        }
+        table.lines td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+        table.lines tr:nth-child(even) { background-color: #fafafa; }
+        .amount-debit { color: #b00020; }
+        .amount-credit { color: #2e7d32; }
+        .text-right { text-align: right; }
+        .footer { margin-top: 20px; font-size: 9px; color: #999; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Account Statement</h1>
+    <div class="sub">
+        Statement period: <span th:text="${statement.periodMonth} + '/' + ${statement.periodYear}">MM/YYYY</span>
+        (through <span th:text="${statement.periodEndDate}">yyyy-MM-dd</span>)
+        &#160;-&#160;
+        <span class="status-badge"
+              th:classappend="${statement.status == 'GENERATED'} ? 'status-generated' : 'status-provisional'"
+              th:text="${statement.status}">STATUS</span>
+    </div>
+</div>
+
+<table class="info-table">
+    <tr>
+        <td class="info-label">Account Holder</td>
+        <td th:text="${holderName}">Name</td>
+    </tr>
+    <tr>
+        <td class="info-label">Account Number</td>
+        <td th:text="${statement.accountNumber}">ACC-0000</td>
+    </tr>
+</table>
+
+<div class="summary-box">
+    <table>
+        <tr>
+            <td class="summary-label">Opening Balance</td>
+            <td class="summary-value" th:text="${#numbers.formatDecimal(statement.openingBalance, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Total Credits</td>
+            <td class="summary-value amount-credit" th:text="'+' + ${#numbers.formatDecimal(statement.totalCredits, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Total Debits</td>
+            <td class="summary-value amount-debit" th:text="'-' + ${#numbers.formatDecimal(statement.totalDebits, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Total Fees</td>
+            <td class="summary-value amount-debit" th:text="'-' + ${#numbers.formatDecimal(statement.totalFees, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        </tr>
+        <tr>
+            <td class="summary-label">Total Interest</td>
+            <td class="summary-value"
+                th:classappend="${statement.lines.?[sourceType == 'INTEREST' and dcIndicator == 'DEBIT'].size() > 0} ? 'amount-debit' : (${statement.totalInterest > 0} ? 'amount-credit' : '')"
+                th:text="(${statement.lines.?[sourceType == 'INTEREST' and dcIndicator == 'DEBIT'].size() > 0} ? '-' : (${statement.totalInterest > 0} ? '+' : '')) + ${#numbers.formatDecimal(statement.totalInterest, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        </tr>
+        <tr class="closing-row">
+            <td class="summary-label"><strong>Closing Balance</strong></td>
+            <td class="summary-value" th:text="${#numbers.formatDecimal(statement.closingBalance, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        </tr>
+    </table>
+</div>
+
+<table class="lines">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th class="text-right">Amount</th>
+        <th class="text-right">Balance</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(statement.lines)}">
+        <td colspan="5" style="text-align:center; color:#999; padding: 15px 0;">
+            No activity for this period.
+        </td>
+    </tr>
+    <tr th:each="line : ${statement.lines}">
+        <td th:text="${line.date}">yyyy-MM-dd</td>
+        <td th:text="${line.description}">Description</td>
+        <td th:text="${line.sourceType}">TRANSACTION</td>
+        <td class="text-right"
+            th:classappend="${line.dcIndicator == 'DEBIT'} ? 'amount-debit' : 'amount-credit'"
+            th:text="${(line.dcIndicator == 'DEBIT' ? '-' : '+')} + ${#numbers.formatDecimal(line.amount, 1, 'COMMA', 2, 'POINT')}">
+            0.00
+        </td>
+        <td class="text-right" th:text="${#numbers.formatDecimal(line.balanceAfter, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="footer">
+    This is a system-generated statement. This document is password protected.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Ledger Account Statements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ================= APP HEADER ================= -->
+  <header class="app-header">
+    <div class="brand-mark">
+      Ledger <span class="brand-badge">Statements</span>
+    </div>
+    <div class="header-right">
+      <div class="user-badge">
+        <span id="userName">User</span>
+        <span id="userRole" class="user-role-tag">USER</span>
+      </div>
+      <button id="logoutBtn" class="btn-text">Sign out</button>
+    </div>
+  </header>
+
+  <!-- ================= APP MAIN ================= -->
+  <main class="app-main">
+
+    <!-- Global App Error Notification -->
+    <div id="appError" class="error-banner" hidden></div>
+
+    <!-- Controls Panel -->
+    <div class="controls-card">
+      <div class="controls-panel">
+        <div class="control-group">
+          <label for="accountSelect">Account</label>
+          <select id="accountSelect"></select>
+        </div>
+
+        <div class="control-group control-group-narrow">
+          <label for="yearInput">Year</label>
+          <input type="number" id="yearInput" min="2000" max="2100" />
+        </div>
+
+        <div class="control-group control-group-narrow">
+          <label for="monthSelect">Month</label>
+          <select id="monthSelect">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </div>
+
+        <div class="control-group control-buttons">
+          <button id="thisMonthBtn" class="btn-outline">This month</button>
+          <button id="lastMonthBtn" class="btn-outline">Last month</button>
+          <button id="viewStatementBtn" class="btn-primary">View statement</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Column Statement View -->
+    <div class="content-columns">
+
+      <!-- History Sidebar -->
+      <aside class="history-panel">
+        <h2>Statement History</h2>
+        <ul id="historyList" class="history-list">
+          <li class="history-empty">Loading history...</li>
+        </ul>
+      </aside>
+
+      <!-- Statement Sheet Presentation -->
+      <div id="statementSheetWrapper">
+        <div id="statementPlaceholder" class="statement-placeholder">
+          <p>Select an account and period above, then click <strong>View statement</strong>.</p>
+        </div>
+
+        <article id="statementSheet" class="statement-sheet" hidden>
+          <div class="sheet-header">
+            <div>
+              <p class="sheet-eyebrow">Statement Period</p>
+              <h2 id="sheetPeriod">—</h2>
+            </div>
+            <span id="sheetStatus" class="status-pill">—</span>
+          </div>
+
+          <div class="sheet-meta">
+            <div>
+              <p class="meta-label">Account Holder</p>
+              <p id="sheetHolder" class="meta-value">—</p>
+            </div>
+            <div>
+              <p class="meta-label">Account Number</p>
+              <p id="sheetAccountNumber" class="meta-value">—</p>
+            </div>
+            <div>
+              <p class="meta-label">Through Date</p>
+              <p id="sheetPeriodEnd" class="meta-value">—</p>
+            </div>
+          </div>
+
+          <div class="sheet-divider"></div>
+
+          <table class="totals-table">
+            <tbody>
+              <tr>
+                <td class="totals-label">Opening Balance</td>
+                <td id="sheetOpening" class="totals-value">—</td>
+              </tr>
+              <tr>
+                <td class="totals-label">Total Credits</td>
+                <td id="sheetCredits" class="totals-value amount-credit">—</td>
+              </tr>
+              <tr>
+                <td class="totals-label">Total Debits</td>
+                <td id="sheetDebits" class="totals-value amount-debit">—</td>
+              </tr>
+              <tr>
+                <td class="totals-label">Total Fees</td>
+                <td id="sheetFees" class="totals-value amount-debit">—</td>
+              </tr>
+              <tr>
+                <td class="totals-label">Total Interest</td>
+                <td id="sheetInterest" class="totals-value">—</td>
+              </tr>
+              <tr class="totals-closing-row">
+                <td class="totals-label">Closing Balance</td>
+                <td id="sheetClosing" class="totals-value totals-closing">—</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="sheet-divider"></div>
+
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th class="align-right">Amount</th>
+                <th class="align-right">Balance</th>
+              </tr>
+            </thead>
+            <tbody id="linesTableBody">
+              <tr><td colspan="5" class="lines-empty">No activity for this period.</td></tr>
+            </tbody>
+          </table>
+
+          <div class="sheet-actions">
+            <button id="downloadPdfBtn" class="btn-primary">Download PDF</button>
+          </div>
+        </article>
+      </div>
+
+    </div>
+
+    <!-- Admin Panel (Admin Only) -->
+    <section id="adminPanel" class="admin-panel" hidden>
+      <h2>Admin — Run Monthly Batch</h2>
+      <p class="admin-sub">Generates final statements for every active account in the system for a completed calendar month (prior to the current month).</p>
+      <div class="admin-controls">
+        <label for="adminYear">Year</label>
+        <input type="number" id="adminYear" min="2000" max="2100" />
+        <label for="adminMonth">Month</label>
+        <select id="adminMonth">
+          <option value="1">January</option><option value="2">February</option>
+          <option value="3">March</option><option value="4">April</option>
+          <option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option>
+          <option value="9">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select>
+        <button id="runBatchBtn" class="btn-primary">Run batch</button>
+      </div>
+      <div id="batchResult" class="batch-result" hidden></div>
+    </section>
+
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

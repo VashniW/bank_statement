@@ -1,0 +1,11 @@
+# Activate with: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# (or SPRING_PROFILES_ACTIVE=dev as an env var)
+#
+# Enables the H2 web console for local inspection of the database.
+# Never activate this profile anywhere reachable outside your own machine -
+# the console is a full SQL client with the default sa/blank credentials.
+
+spring:
+  h2:
+    console:
+      enabled: true
