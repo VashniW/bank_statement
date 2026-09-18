@@ -13,4 +13,12 @@ public interface FeeRepository extends JpaRepository<Fee, Long> {
 
     Optional<Fee> findByAccountIdAndPeriodYearAndPeriodMonthAndSourceRule(
             Long accountId, Integer periodYear, Integer periodMonth, String sourceRule);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM Fee f WHERE f.account.id = :accountId AND f.periodYear = :periodYear AND f.periodMonth = :periodMonth")
+    void deleteAllByAccountIdAndPeriodYearAndPeriodMonth(
+            @org.springframework.data.repository.query.Param("accountId") Long accountId,
+            @org.springframework.data.repository.query.Param("periodYear") Integer periodYear,
+            @org.springframework.data.repository.query.Param("periodMonth") Integer periodMonth);
 }
+

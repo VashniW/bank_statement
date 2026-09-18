@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "account")
@@ -40,17 +41,13 @@ public class Account {
     @Column(nullable = false, length = 20)
     private AccountStatus status;
 
+    @Builder.Default
+    @Column(name = "opened_date", nullable = false, columnDefinition = "date default '2026-01-01' not null")
+    private LocalDate openedDate = LocalDate.of(2026, 1, 1);
+
+
     /**
-     * The balance this account actually carried before this system's
-     * transaction history begins - NOT the same as "opening date" (which we
-     * deliberately don't track). Needed because an onboarded/migrated
-     * account may have had a real non-zero balance that predates every
-     * Transaction row we hold for it. Defaults to 0 for accounts whose full
-     * history genuinely starts here (e.g. all seeded demo accounts).
-     *
-     * This is the true floor PeriodBalanceService falls back to - NOT a
-     * hardcoded zero - once it runs out of prior Statement records or
-     * transaction history to chain back through.
+     * The balance this account carried upon opening / onboarding.
      */
     @Builder.Default
     @Column(name = "opening_balance", nullable = false, precision = 19, scale = 2, columnDefinition = "numeric(19,2) default 0 not null")

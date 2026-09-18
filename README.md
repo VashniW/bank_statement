@@ -23,6 +23,11 @@ The service handles transaction aggregation, dynamic fee and tiered interest cal
   - Thymeleaf + OpenPDF rendering compliant bank statement documents.
   - 128-bit encryption locked with an account-holder password rule (`FIRST4NAME + LAST4ACCOUNT`).
   - Efficient file-system caching for finalized statements (`./data/statement-pdfs/`).
+- **Account Opening Date & Historical Recursion**:
+  - Each account tracks an explicit `openedDate` (defaults to `2026-01-01`).
+  - Requesting a statement for any month automatically cascades backward down to the account's opening month, ensuring statements are generated in strict chronological order with unbroken opening-to-closing balance continuity.
+  - Periods prior to an account's `openedDate` cannot be requested.
+
 - **Security & RBAC**:
   - Stateless JWT (JSON Web Token) authentication with BCrypt password hashing.
   - Role-Based Access Control (`ROLE_USER`, `ROLE_ADMIN`) with strict IDOR protections (users cannot view other users' accounts).

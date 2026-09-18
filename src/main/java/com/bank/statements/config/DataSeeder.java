@@ -41,14 +41,24 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (userRepository.count() > 0) {
             log.info("Database already seeded - skipping seed data load.");
-            accountRepository.findByAccountNumber("SAV-0002-0004").ifPresent(acc -> {
-                if (acc.getOpeningBalance() == null || acc.getOpeningBalance().compareTo(BigDecimal.valueOf(25000)) != 0) {
+            accountRepository.findAll().forEach(acc -> {
+                boolean changed = false;
+                if (acc.getOpenedDate() == null) {
+                    acc.setOpenedDate(LocalDate.of(2026, 1, 1));
+                    changed = true;
+                }
+                if ("SAV-0002-0004".equals(acc.getAccountNumber()) &&
+                        (acc.getOpeningBalance() == null || acc.getOpeningBalance().compareTo(BigDecimal.valueOf(25000)) != 0)) {
                     acc.setOpeningBalance(BigDecimal.valueOf(25000));
+                    changed = true;
+                }
+                if (changed) {
                     accountRepository.save(acc);
                 }
             });
             return;
         }
+
         log.info("Empty database detected - loading seed data.");
         seed();
     }
@@ -83,6 +93,7 @@ public class DataSeeder implements CommandLineRunner {
                 .accountType(AccountType.SAVINGS)
                 .currency("INR")
                 .status(AccountStatus.ACTIVE)
+                .openedDate(LocalDate.of(2026, 1, 1))
                 .build());
 
         Account credit1 = accountRepository.save(Account.builder()
@@ -91,6 +102,7 @@ public class DataSeeder implements CommandLineRunner {
                 .accountType(AccountType.CREDIT)
                 .currency("INR")
                 .status(AccountStatus.ACTIVE)
+                .openedDate(LocalDate.of(2026, 1, 1))
                 .build());
 
         Account wallet1 = accountRepository.save(Account.builder()
@@ -99,21 +111,20 @@ public class DataSeeder implements CommandLineRunner {
                 .accountType(AccountType.WALLET)
                 .currency("INR")
                 .status(AccountStatus.ACTIVE)
+                .openedDate(LocalDate.of(2026, 1, 1))
                 .build());
 
         // Zero-activity account - tests the "no transactions in period" statement case.
-        // Given a non-zero opening balance to demonstrate that an account's true
-        // starting balance is respected even with zero transactions ever recorded -
-        // previously this account would have incorrectly shown an opening/closing
-        // balance of 0 in every statement regardless of its real balance.
         accountRepository.save(Account.builder()
                 .user(vikram)
                 .accountNumber("SAV-0002-0004")
                 .accountType(AccountType.SAVINGS)
                 .currency("INR")
                 .status(AccountStatus.ACTIVE)
+                .openedDate(LocalDate.of(2026, 1, 1))
                 .openingBalance(BigDecimal.valueOf(25000))
                 .build());
+
 
         // --- Savings account 1: July 2026 ---
         txn(savings1, "2026-07-02", 50000, TransactionType.CREDIT, "SALARY", "Salary credit - July");

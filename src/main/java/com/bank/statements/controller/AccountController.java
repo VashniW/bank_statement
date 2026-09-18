@@ -38,7 +38,9 @@ public class AccountController {
                         a.getCurrency(),
                         a.getStatus().name(),
                         a.getOpeningBalance(),
+                        a.getOpenedDate(),
                         a.getUser() != null ? a.getUser().getName() : null))
                 .toList();
+
     }
 }
